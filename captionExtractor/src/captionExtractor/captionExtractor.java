@@ -27,7 +27,8 @@ public class captionExtractor {
 			  System.exit(0);
 		  }
 		  
-		  //Kapott PDF állományt, betöltöm és elkezdem feldolgozni
+
+		  //Kapott PDF állományt, betöltöm és elkezdem feldolgozni		  
 		  PDDocument doc = PDDocument.load(new File(fileName));
 		  
 		  //Egy arrayListben tárolom a képaláírásokat, mivel nem tudom pontosan mennyi szerepel a fájlban.
@@ -40,14 +41,14 @@ public class captionExtractor {
 		  
 		  //Kapott dokumentum lezárása.
 		  doc.close();
-		  
+		 
 		  //Új PDF állomány készítése
 		  String resultFileName = "./result.pdf"; 
 		  createDocument(resultFileName);
 		  
 		  //PDF állomány írása
 		  writeDocument(resultFileName,captions);
-		  
+		 
 	  }
 	  //Létrehozok egy üres dokumentumot
 	  public static void createDocument(String fileName) throws IOException {
@@ -147,10 +148,35 @@ public class captionExtractor {
 		  List <String> captionLst = new ArrayList<String>(); 
 		  for(int i=1;i<=doc.getNumberOfPages();i++) {
 			  String pageText = getTextFromPage(i,doc);
-			  //A dokumentum összes lapjáról, egyenként megkapom a szöveget
+			  //A dokumentum összes lapjáról, egyenként kinyerem a szöveget
 			  //Ezt a szöveget sorokra bontom
 			  String lines[] = pageText.split("\\r?\\n");
 			  
+			  /*
+			   * Az oldalszám sorában szerepel egy szövegrész, "© Adobe Systems Incorporated 2008 – All rights reserved"
+			   * ami alapján meg tudom különböztetni az oldalszámot a többi számtól.
+			   * Igazából én csak a végét használtam fel, mivel úgygondoltam hogy ez is elegendő.
+			   */
+			  Pattern patternForPageNumber = Pattern.compile("All rights reserved");
+			  Matcher matcher;
+			  //A pageNumber változóban fogom tárolni a dokumentum által használt oldalszámot
+			  String pageNumber = null;
+			  for(String line : lines) {
+				  matcher = patternForPageNumber.matcher(line);
+				  if(matcher.find()) {
+					  // Szétszedem szavakra a sorokat, whitespace-ek mentén
+					  String [] words = line.split(" ");
+					  /*
+					   * Az említett keresési mintánál, megfigyelhető hogy páratlan oldalak esetén, 
+					   * az oldalszám az utolsó szó. 
+					   * Páros oldalaknál viszont, a sorban az első szó tartalmazza az oldalszámot.
+					   */
+					  if(i % 2 == 0) 
+						  pageNumber = words[0];
+					  else
+						  pageNumber = words[words.length-1];
+				  }
+			  }
 			  /*
 			   * Megfigyeltem hogy a szövegben, egy átlagos képaláírásban mik a közösek, és a következőre jutottam:
 			   * "Figure"*Bármi*[Egy szám][whitespace][–][whitespace]
@@ -158,14 +184,15 @@ public class captionExtractor {
 			   */
 			  Pattern patternHead = Pattern.compile("Figure");
 			  Pattern patternTail = Pattern.compile("\\d\s–\s");
+			  
 			  for(int j=0;j<lines.length;j++) {
-				  Matcher matcher = patternHead.matcher(lines[j]);
+				  matcher = patternHead.matcher(lines[j]);
 				  //Amikor megtalálta a "Figure" részt, azt a String-et nézi tovább 
 				  if(matcher.find()) {
 					  matcher = patternTail.matcher(lines[j]);
-					  //Amennyiben megtalálta hozzá a [whitespace][–][whitespace] részt is, őt találatnak veszem
+					  //Amennyiben megtalálta hozzá a [whitespace][–][whitespace] részt is, találatnak minősítem
 					  if(matcher.find()) 
-						  captionLst.add(lines[j]+" – Page "+i);
+						  captionLst.add(lines[j]+" – Page "+pageNumber+"("+i+")");
 				  }
 			  }
 		  }
