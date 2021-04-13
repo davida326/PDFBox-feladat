@@ -38,14 +38,14 @@ public class CaptionExtractor {
    * Returns an ArrayList of String objects, that will be our captions.
    * The doc argument must specify the document object, where the text will be extracted from.
    * <p>
-   * The method extract the text from every page, and breaks it down into paragraphs.
-   * Then it search each paragraphs to find the one, that contains the page number
+   * The method extracts the text from every page, and breaks it down into paragraphs.
+   * Then it searches each paragraphs to find the one, that contains the page number
    * and then it will do the same with the captions.
    * To achive this, it uses patterns and regex, "Figure" and the "\\d\s–\s" for the caption 
    * and "All rights reserved" for the pagenumber.
    * This and the main method will throw an IOExecption, if the document is non-existent.
    * 
-   * @param doc the document object to extract the text from
+   * @param doc the document object, where from text will be extracted
    * @return captions from the images
    * @throws IOException If an input or output exception occurred
    */
@@ -115,7 +115,7 @@ public class CaptionExtractor {
    * This method writes the extracted captions to a new document.
    * Has no return type.
    * <p>
-   * It opens the document and sets the page size, fonts, starting position.
+   * It opens the document and sets the page size, fonts and starting position.
    * Then it breaks the lines into shorter ones, that will fit the page's width.
    * It will start to write the lines to the page, when its near at the end,
    * itt will drop the page and create an another one (Set the pagesize, fonts, etc... again)
