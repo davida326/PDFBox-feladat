@@ -1,11 +1,12 @@
 package in.at.maven;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,9 +19,8 @@ import org.apache.pdfbox.text.PDFTextStripper;
 
 public class CaptionExtractor {
   public static void main(String[] args)throws IOException {
-    PrintStream oldErr = System.err;
-    PrintStream newErr = new PrintStream(new ByteArrayOutputStream());
-    System.setErr(newErr);
+    
+    Logger.getLogger("org.apache.pdfbox").setLevel(Level.OFF);
     
     String fileName = null;
     if( args.length > 0)
@@ -37,8 +37,7 @@ public class CaptionExtractor {
     String resultFileName = "./result.pdf"; 
     createDocument(resultFileName);
     writeDocument(resultFileName,captions);
-    System.setErr(oldErr);
-
+    
   }
   
   /**
